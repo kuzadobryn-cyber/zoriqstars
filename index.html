@@ -1,290 +1,525 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ZoriqStars</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 22px 16px;
-      background: #101321;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    h1 { text-align: center; color: #ffd76a; }
-    .subtitle { text-align: center; color: #aeb4ca; }
-    .wrap { max-width: 480px; margin: auto; }
-    .product, .panel {
-      background: #20263d;
-      border: 1px solid #414b70;
-      border-radius: 16px;
-      padding: 18px;
-      margin: 14px 0;
-    }
-    .product p, .muted { color: #c5cbe0; }
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 9px;
-      border: 0;
-      border-radius: 10px;
-      background: #ffd76a;
-      color: #171a27;
-      font-weight: bold;
-      font-size: 15px;
-    }
-    button.secondary {
-      background: #414b70;
-      color: white;
-    }
-    .price { color: #ffd76a; font-weight: bold; }
-    .cart-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 0;
-      border-bottom: 1px solid #414b70;
-    }
-    .cart-row button {
-      width: auto;
-      min-width: 38px;
-      margin: 0;
-      padding: 8px 12px;
-    }
-    #cartCount { color: #ffd76a; }
-    #details, #orderResult { display: none; }
-    .order {
-      border-bottom: 1px solid #414b70;
-      padding: 12px 0;
-    }
-    .order:last-child { border-bottom: 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZoriqStars</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#081426;color:#f4f6fb;font-family:Arial,sans-serif}
+header{padding:20px;background:#10213a;border-bottom:1px solid #34445e}
+h1{margin:0;color:#e8bd62}
+h2{margin-top:0}
+main{max-width:850px;margin:auto;padding:18px}
+.muted{color:#9eacc0;font-size:14px}
+.card{background:#12243d;border:1px solid #30445f;border-radius:15px;padding:16px;margin:12px 0}
+button{background:#d5aa52;color:#101827;border:0;border-radius:9px;padding:12px 15px;font-weight:bold;cursor:pointer;margin:4px}
+button.secondary{background:#30445f;color:white}
+button.danger{background:#a83d49;color:white}
+input,textarea{width:100%;padding:12px;margin:7px 0;background:#0b192c;color:white;border:1px solid #40536d;border-radius:8px}
+.price{color:#e8bd62;font-weight:bold}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:15px 0}
+nav button{flex:1;min-width:100px}
+.hidden{display:none!important}
+.stat{font-size:25px;color:#e8bd62;font-weight:bold}
+.product-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+hr{border:0;border-top:1px solid #30445f;margin:15px 0}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>⭐ ZoriqStars</h1>
-    <p class="subtitle">Демонстрационный магазин</p>
+<header>
+  <h1>⭐ ZoriqStars</h1>
+  <p class="muted">Демонстрационный каталог</p>
+</header>
 
-    <div id="catalog">
-      <div class="product">
-        <h2>⭐ Telegram Stars</h2>
-        <p>Демонстрационный товар Stars.</p>
-        <p class="price">Тестовая цена: 100 баллов</p>
-        <button onclick="showDetails('Telegram Stars')">Подробнее</button>
-        <button class="secondary" onclick="addToCart('Telegram Stars')">Добавить в корзину</button>
+<main>
+  <section id="store">
+    <h2>Каталог</h2>
+    <div id="catalog"></div>
+
+    <h2>🛒 Корзина</h2>
+    <div class="card">
+      <div id="cart">Корзина пуста.</div>
+      <p class="price" id="cartTotal">Итого: 0 баллов</p>
+      <button onclick="makeOrder()">Создать тестовый заказ</button>
+      <p id="orderResult" class="muted"></p>
+    </div>
+
+    <h2>📦 История заказов на этом устройстве</h2>
+    <div id="orderHistory" class="muted">Заказов пока нет.</div>
+    <hr>
+    <button class="secondary" onclick="openAdmin()">🔐 Панель владельца</button>
+  </section>
+
+  <section id="admin" class="hidden">
+    <h2>⭐ Панель владельца</h2>
+    <p id="adminStatus" class="muted">Проверка доступа...</p>
+
+    <nav>
+      <button onclick="showTab('dashboard')">Главная</button>
+      <button onclick="showTab('orders')">Заказы</button>
+      <button onclick="showTab('products')">Товары</button>
+      <button onclick="showTab('settings')">Настройки</button>
+    </nav>
+
+    <section id="tab-dashboard">
+      <h2>📊 Главная</h2>
+      <div class="card">
+        <p class="muted">Всего тестовых заказов</p>
+        <div class="stat" id="statOrders">—</div>
       </div>
-
-      <div class="product">
-        <h2>💎 Telegram Premium</h2>
-        <p>Демонстрационный товар Premium.</p>
-        <p class="price">Тестовая цена: 300 баллов</p>
-        <button onclick="showDetails('Telegram Premium')">Подробнее</button>
-        <button class="secondary" onclick="addToCart('Telegram Premium')">Добавить в корзину</button>
+      <div class="card">
+        <p class="muted">Сумма тестовых баллов</p>
+        <div class="stat" id="statPoints">—</div>
       </div>
-    </div>
+      <div class="card">
+        <p class="muted">Количество демо-товаров</p>
+        <div class="stat" id="statProducts">—</div>
+      </div>
+      <button onclick="loadDashboard()">Обновить статистику</button>
+    </section>
 
-    <div id="details" class="panel">
-      <h2 id="detailName"></h2>
-      <p class="muted">Демонстрационная карточка. Реальная покупка недоступна.</p>
-      <button onclick="hideDetails()">Назад к товарам</button>
-    </div>
+    <section id="tab-orders" class="hidden">
+      <h2>📦 Заказы</h2>
+      <button onclick="loadOrders()">Обновить заказы</button>
+      <div id="adminOrders"></div>
+    </section>
 
-    <div class="panel">
-      <h2>🛒 Корзина <span id="cartCount">(0)</span></h2>
-      <div id="cartItems" class="muted">Корзина пока пуста.</div>
-      <h3>Итого: <span class="price" id="total">0</span> баллов</h3>
-      <button onclick="makeOrder()">Оформить тестовый заказ</button>
-      <button class="secondary" onclick="clearCart()">Очистить корзину</button>
-    </div>
+    <section id="tab-products" class="hidden">
+      <h2>🛍️ Управление товарами</h2>
+      <div class="card">
+        <h3>Добавить товар</h3>
+        <input id="newName" placeholder="Название товара">
+        <input id="newPrice" type="number" min="0" placeholder="Цена в тестовых баллах">
+        <textarea id="newDescription" placeholder="Описание товара"></textarea>
+        <button onclick="addProduct()">Добавить товар</button>
+      </div>
+      <h3>Список товаров</h3>
+      <div id="adminProducts"></div>
+    </section>
 
-    <div id="orderResult" class="panel">
-      <h2>✅ Тестовый заказ создан!</h2>
-      <p id="orderText"></p>
-      <p class="muted">Это учебная запись. Деньги не списываются.</p>
-      <button onclick="closeOrder()">Продолжить</button>
-    </div>
+    <section id="tab-settings" class="hidden">
+      <h2>⚙️ Настройки</h2>
+      <div class="card">
+        <p>Проект: ZoriqStars</p>
+        <p>Режим: демонстрационный</p>
+        <p>Платежи: отключены</p>
+        <p>Сервер: <span id="serverStatus">Проверка...</span></p>
+        <p>Авторизация: Telegram Web App</p>
+      </div>
+      <button onclick="checkServer()">Проверить сервер</button>
+      <button class="secondary" onclick="closeAdmin()">Вернуться в каталог</button>
+    </section>
 
-    <div class="panel">
-      <h2>📋 История заказов</h2>
-      <div id="orderHistory" class="muted">Заказов пока нет.</div>
-    </div>
-  </div>
+    <button class="secondary" onclick="closeAdmin()">Закрыть админ-панель</button>
+  </section>
+</main>
 
-  <script>
-    const prices = {
-      "Telegram Stars": 100,
-      "Telegram Premium": 300
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+const API = "";
+const defaultProducts = [
+  {id:"stars",name:"Telegram Stars",price:100,description:"Демонстрационный товар. Тестовые баллы."},
+  {id:"premium",name:"Telegram Premium",price:300,description:"Демонстрационный товар. Тестовые баллы."}
+];
+
+let products = [...defaultProducts];
+let cart = {};
+
+function getInitData(){
+  return tg?.initData || "";
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(API + path, {
+    ...options,
+    headers: {
+      "Content-Type":"application/json",
+      "X-Telegram-Init-Data":getInitData(),
+      ...(options.headers || {})
+    }
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "Ошибка сервера: " + response.status);
+  }
+  return data;
+}
+
+// Каталог
+function renderCatalog(){
+  const el = document.getElementById("catalog");
+  el.replaceChildren();
+
+  products.forEach(product => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const name = document.createElement("h3");
+    name.textContent = product.name;
+
+    const description = document.createElement("p");
+    description.className = "muted";
+    description.textContent = product.description;
+
+    const price = document.createElement("p");
+    price.className = "price";
+    price.textContent = product.price + " тестовых баллов";
+
+    const button = document.createElement("button");
+    button.textContent = "Добавить в корзину";
+    button.onclick = () => addToCart(product.id);
+
+    card.append(name, description, price, button);
+    el.append(card);
+  });
+}
+
+function addToCart(id){
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+  cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+}
+
+function renderCart(){
+  const el = document.getElementById("cart");
+  el.replaceChildren();
+  let total = 0;
+  let hasItems = false;
+
+  products.forEach(product => {
+    const quantity = cart[product.id] || 0;
+    if (!quantity) return;
+    hasItems = true;
+    total += quantity * product.price;
+
+    const row = document.createElement("p");
+    row.textContent = product.name + " × " + quantity + " ";
+
+    const minus = document.createElement("button");
+    minus.className = "secondary";
+    minus.textContent = "−";
+    minus.onclick = () => {
+      cart[product.id]--;
+      if (cart[product.id] <= 0) delete cart[product.id];
+      renderCart();
     };
 
-    const cart = {};
+    const plus = document.createElement("button");
+    plus.className = "secondary";
+    plus.textContent = "+";
+    plus.onclick = () => addToCart(product.id);
 
-    function getOrders() {
-      try {
-        return JSON.parse(localStorage.getItem("zoriqOrders") || "[]");
-      } catch {
-        return [];
-      }
-    }
+    row.append(minus, plus);
+    el.append(row);
+  });
 
-    function saveOrders(orders) {
-      localStorage.setItem("zoriqOrders", JSON.stringify(orders));
-    }
+  if (!hasItems) el.textContent = "Корзина пуста.";
+  document.getElementById("cartTotal").textContent = "Итого: " + total + " баллов";
+}
 
-    function showDetails(name) {
-      document.getElementById("catalog").style.display = "none";
-      document.getElementById("details").style.display = "block";
-      document.getElementById("detailName").textContent = name;
-    }
+// Локальная история
+function getOrders(){
+  try {
+    return JSON.parse(localStorage.getItem("zoriqOrders") || "[]");
+  } catch {
+    return [];
+  }
+}
 
-    function hideDetails() {
-      document.getElementById("catalog").style.display = "block";
-      document.getElementById("details").style.display = "none";
-    }
+function renderHistory(){
+  const el = document.getElementById("orderHistory");
+  el.replaceChildren();
+  const orders = getOrders();
 
-    function addToCart(name) {
-      cart[name] = (cart[name] || 0) + 1;
-      renderCart();
-    }
+  if (!orders.length) {
+    el.textContent = "Заказов пока нет.";
+    return;
+  }
 
-    function changeQty(name, amount) {
-      cart[name] = (cart[name] || 0) + amount;
-      if (cart[name] <= 0) delete cart[name];
-      renderCart();
-    }
+  orders.forEach(order => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const title = document.createElement("strong");
+    title.textContent = "Заказ " + order.id;
+    const date = document.createElement("p");
+    date.className = "muted";
+    date.textContent = order.date;
+    const items = document.createElement("p");
+    items.textContent = (order.items || []).map(i =>
 
-    function renderCart() {
-      const names = Object.keys(cart);
-      const count = names.reduce((sum, name) => sum + cart[name], 0);
-      const total = names.reduce((sum, name) => sum + cart[name] * prices[name], 0);
+i.name + " × " + i.quantity
+    ).join(", ");
+    const total = document.createElement("p");
+    total.className = "price";
+    total.textContent = "Итого: " + order.total + " баллов";
+    card.append(title, date, items, total);
+    el.append(card);
+  });
+}
 
-      document.getElementById("cartCount").textContent = "(" + count + ")";
-      document.getElementById("total").textContent = total;
+async function makeOrder(){
+  const items = products
+    .filter(p => cart[p.id])
+    .map(p => ({id:p.id, quantity:cart[p.id]}));
 
-      const items = document.getElementById("cartItems");
+  if (!items.length) {
+    alert("Сначала добавь товар в корзину.");
+    return;
+  }
 
-      if (names.length === 0) {
-        items.textContent = "Корзина пока пуста.";
-        return;
-      }
+  if (!getInitData()) {
+    alert("Открой приложение через Telegram, чтобы создать серверный тестовый заказ.");
+    return;
+  }
 
-      items.replaceChildren();
+  try {
+    const result = await api("/api/orders", {
+      method:"POST",
+      body:JSON.stringify({items})
+    });
 
-      names.forEach(name => {
-        const row = document.createElement("div");
-        row.className = "cart-row";
+    const order = {
+      id:result.order.id,
+      date:new Date(result.order.date).toLocaleString("ru-RU"),
+      items:result.order.items,
+      total:result.order.total
+    };
 
-        const info = document.createElement("span");
-        info.textContent = name + " — " + prices[name] + " баллов × " + cart[name];
+    const oldOrders = getOrders();
+    oldOrders.unshift(order);
+    localStorage.setItem("zoriqOrders", JSON.stringify(oldOrders));
 
-        const controls = document.createElement("span");
-
-        const minus = document.createElement("button");
-        minus.textContent = "−";
-        minus.onclick = () => changeQty(name, -1);
-
-        const plus = document.createElement("button");
-        plus.textContent = "+";
-        plus.onclick = () => changeQty(name, 1);
-
-        controls.append(minus, plus);
-        row.append(info, controls);
-        items.append(row);
-      });
-    }
-
-    function makeOrder() {
-      const names = Object.keys(cart);
-
-      if (names.length === 0) {
-        alert("Сначала добавь товар в корзину.");
-        return;
-      }
-
-      const total = names.reduce(
-        (sum, name) => sum + cart[name] * prices[name], 0
-      );
-
-      const order = {
-        id: "DEMO-" + Date.now().toString().slice(-6),
-        date: new Date().toLocaleString("ru-RU"),
-        items: names.map(name => ({
-          name,
-          quantity: cart[name],
-          price: prices[name]
-        })),
-        total
-      };
-
-      const orders = getOrders();
-      orders.unshift(order);
-
-      try {
-        saveOrders(orders);
-      } catch {
-        alert("Не удалось сохранить заказ на этом устройстве.");
-        return;
-      }
-
-      document.getElementById("orderText").textContent =
-        "Номер: " + order.id + ". Сумма: " + total + " баллов.";
-
-      document.getElementById("orderResult").style.display = "block";
-
-      clearCart();
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const history = document.getElementById("orderHistory");
-      const orders = getOrders();
-
-      history.replaceChildren();
-
-      if (orders.length === 0) {
-        history.textContent = "Заказов пока нет.";
-        return;
-      }
-
-      orders.forEach(order => {
-        const card = document.createElement("div");
-        card.className = "order";
-
-        const title = document.createElement("strong");
-        title.textContent = "Заказ " + order.id;
-
-        const date = document.createElement("p");
-        date.className = "muted";
-        date.textContent = order.date;
-
-        const products = document.createElement("p");
-        products.textContent = order.items
-          .map(item => item.name + " × " + item.quantity)
-          .join(", ");
-
-        const total = document.createElement("p");
-        total.className = "price";
-        total.textContent = "Итого: " + order.total + " баллов";
-
-        card.append(title, date, products, total);
-        history.append(card);
-      });
-    }
-
-    function clearCart() {
-      Object.keys(cart).forEach(name => delete cart[name]);
-      renderCart();
-    }
-
-    function closeOrder() {
-      document.getElementById("orderResult").style.display = "none";
-    }
-
+    cart = {};
     renderCart();
     renderHistory();
-  </script>
+    document.getElementById("orderResult").textContent =
+      "Тестовый заказ создан: " + order.id;
+  } catch(error) {
+    alert("Не удалось создать заказ: " + error.message);
+  }
+}
+
+// Админ-панель
+async function openAdmin(){
+  document.getElementById("store").classList.add("hidden");
+  document.getElementById("admin").classList.remove("hidden");
+  document.getElementById("adminStatus").textContent = "Проверяем владельца...";
+
+  try {
+    await api("/api/admin-check", {method:"POST",body:"{}"});
+    document.getElementById("adminStatus").textContent = "Доступ владельца подтверждён.";
+    showTab("dashboard");
+    await Promise.all([loadDashboard(), loadOrders(), loadProducts()]);
+  } catch(error) {
+    document.getElementById("adminStatus").textContent =
+      "Доступ запрещён: " + error.message;
+    document.getElementById("admin").classList.add("hidden");
+    document.getElementById("store").classList.remove("hidden");
+    alert("Панель доступна только владельцу через Telegram.");
+  }
+}
+
+function closeAdmin(){
+  document.getElementById("admin").classList.add("hidden");
+  document.getElementById("store").classList.remove("hidden");
+}
+
+function showTab(name){
+  ["dashboard","orders","products","settings"].forEach(tab => {
+    document.getElementById("tab-" + tab).classList.toggle("hidden", tab !== name);
+  });
+}
+
+async function loadDashboard(){
+  try {
+    const data = await api("/api/admin/stats");
+    document.getElementById("statOrders").textContent = data.ordersCount;
+    document.getElementById("statPoints").textContent = data.totalPoints;
+    document.getElementById("statProducts").textContent = data.productsCount;
+  } catch(error) {
+    alert("Ошибка статистики: " + error.message);
+  }
+}
+
+async function loadOrders(){
+  const el = document.getElementById("adminOrders");
+  el.textContent = "Загрузка...";
+
+  try {
+    const data = await api("/api/admin/orders");
+    el.replaceChildren();
+
+    if (!data.orders.length) {
+      el.textContent = "Серверных тестовых заказов пока нет.";
+      return;
+    }
+
+    data.orders.forEach(order => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const title = document.createElement("h3");
+      title.textContent = order.id;
+
+      const date = document.createElement("p");
+      date.className = "muted";
+      date.textContent = new Date(order.date).toLocaleString("ru-RU");
+
+      const items = document.createElement("p");
+      items.textContent = order.items.map(i =>
+        i.name + " × " + i.quantity
+      ).join(", ");
+
+      const total = document.createElement("p");
+      total.className = "price";
+      total.textContent = "Итого: " + order.total + " баллов";
+
+      card.append(title, date, items, total);
+      el.append(card);
+    });
+  } catch(error) {
+    el.textContent = "Ошибка: " + error.message;
+  }
+}
+
+async function loadProducts(){
+  const el = document.getElementById("adminProducts");
+  el.textContent = "Загрузка...";
+
+  try {
+    const data = await api("/api/admin/products");
+    el.replaceChildren();
+
+    data.products.forEach(product => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const title = document.createElement("h3");
+      title.textContent = product.name;
+
+      const price = document.createElement("p");
+      price.className = "price";
+      price.textContent = product.price + " баллов";
+
+      const description = document.createElement("p");
+      description.className = "muted";
+      description.textContent = product.description || "";
+
+      const edit = document.createElement("button");
+      edit.textContent = "Изменить";
+      edit.onclick = () => editProduct(product);
+
+      const remove = document.createElement("button");
+      remove.className = "danger";
+      remove.textContent = "Удалить";
+      remove.onclick = () => deleteProduct(product.id);
+
+      card.append(title, price, description, edit, remove);
+      el.append(card);
+    });
+
+    if (!data.products.length) el.textContent = "Товаров пока нет.";
+  } catch(error) {
+    el.textContent = "Ошибка: " + error.message;
+  }
+}
+
+async function addProduct(){
+  const name = document.getElementById("newName").value.trim();
+  const price = Number(document.getElementById("newPrice").value);
+  const description = document.getElementById("newDescription").value.trim();
+
+  if (!name || !Number.isInteger(price) || price < 0) {
+    alert("Введи название и целую неотрицательную цену.");
+    return;
+  }
+
+  try {
+    await api("/api/admin/products", {
+      method:"POST",
+      body:JSON.stringify({name,price,description})
+    });
+
+    document.getElementById("newName").value = "";
+    document.getElementById("newPrice").value = "";
+    document.getElementById("newDescription").value = "";
+
+    await loadProducts();
+    await loadDashboard();
+    alert("Демо-товар добавлен.");
+  } catch(error) {
+    alert("Ошибка: " + error.message);
+  }
+}
+
+async function editProduct(product){
+  const name = prompt("Новое название:", product.name);
+  if (name === null) return;
+
+  const priceText = prompt("Новая цена в тестовых баллах:", product.price);
+  if (priceText === null) return;
+
+  const price = Number(priceText);
+  const description = prompt("Новое описание:", product.description || "");
+  if (description === null) return;
+
+  if (!name.trim() || !Number.isInteger(price) || price < 0) {
+    alert("Проверь название и цену.");
+    return;
+  }
+
+  try {
+    await api("/api/admin/products/" + encodeURIComponent(product.id), {
+      method:"PUT",
+      body:JSON.stringify({name,price,description})
+    });
+    await loadProducts();
+    await loadDashboard();
+    alert("Товар изменён.");
+  } catch(error) {
+    alert("Ошибка: " + error.message);
+  }
+}
+
+async function deleteProduct(id){
+  if (!confirm("Удалить этот демо-товар?")) return;
+
+  try {
+    await api("/api/admin/products/" + encodeURIComponent(id), {
+      method:"DELETE"
+    });
+    await loadProducts();
+    await loadDashboard();
+    alert("Товар удалён.");
+  } catch(error) {
+    alert("Ошибка: " + error.message);
+  }
+}
+
+async function checkServer(){
+  try {
+    const response = await fetch("/health");
+    const data = await response.json();
+    document.getElementById("serverStatus").textContent =
+      data.ok ? "Работает" : "Не отвечает";
+  } catch {
+    document.getElementById("serverStatus").textContent = "Недоступен";
+  }
+}
+
+renderCatalog();
+renderCart();
+renderHistory();
+checkServer();
+</script>
 </body>
 </html>
