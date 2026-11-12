@@ -36,6 +36,7 @@ hr{border:0;border-top:1px solid #30445f;margin:15px 0}
 <main>
   <section id="store">
     <h2>Каталог</h2>
+    <p id="catalogStatus" class="muted">Загрузка товаров...</p>
     <div id="catalog"></div>
 
     <h2>🛒 Корзина</h2>
@@ -118,21 +119,33 @@ hr{border:0;border-top:1px solid #30445f;margin:15px 0}
 
 <script>
 const tg = window.Telegram?.WebApp;
+
 if (tg) {
   tg.ready();
   tg.expand();
 }
 
 const API = "";
+
 const defaultProducts = [
-  {id:"stars",name:"Telegram Stars",price:100,description:"Демонстрационный товар. Тестовые баллы."},
-  {id:"premium",name:"Telegram Premium",price:300,description:"Демонстрационный товар. Тестовые баллы."}
+  {
+    id:"stars",
+    name:"Telegram Stars",
+    price:100,
+    description:"Демонстрационный товар. Тестовые баллы."
+  },
+  {
+    id:"premium",
+    name:"Telegram Premium",
+    price:300,
+    description:"Демонстрационный товар. Тестовые баллы."
+  }
 ];
 
 let products = [...defaultProducts];
 let cart = {};
 
-function getInitData(){
+function getInitData() {
   return tg?.initData || "";
 }
 
@@ -147,16 +160,58 @@ async function api(path, options = {}) {
   });
 
   const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
     throw new Error(data.error || "Ошибка сервера: " + response.status);
   }
+
   return data;
 }
 
-// Каталог
-function renderCatalog(){
+// Загрузка каталога с сервера
+async function loadCatalog() {
+  const status = document.getElementById("catalogStatus");
+  status.textContent = "Загрузка товаров...";
+
+  try {
+    const response = await fetch(API + "/api/products");
+    if (!response.ok) {
+      throw new Error("Ошибка загрузки каталога");
+    }
+
+    const data = await response.json();
+
+    if (!data.ok || !Array.isArray(data.products)) {
+      throw new Error("Неверный формат каталога");
+    }
+
+    products = data.products;
+    status.textContent = "Каталог синхронизирован с сервером.";
+  } catch (error) {
+    console.error("Ошибка каталога:", error);
+    status.textContent = "Не удалось обновить каталог. Показаны запасные товары.";
+  }
+
+  // Удаляем из корзины отсутствующие товары
+  Object.keys(cart).forEach(id => {
+    if (!products.some(product => product.id === id)) {
+      delete cart[id];
+    }
+  });
+
+  renderCatalog();
+  renderCart();
+}
+
+// Отображение каталога
+function renderCatalog() {
   const el = document.getElementById("catalog");
   el.replaceChildren();
+
+  if (!products.length) {
+    el.textContent = "Товаров пока нет.";
+    return;
+  }
 
   products.forEach(product => {
     const card = document.createElement("div");
@@ -167,7 +222,7 @@ function renderCatalog(){
 
     const description = document.createElement("p");
     description.className = "muted";
-    description.textContent = product.description;
+    description.textContent = product.description || "";
 
     const price = document.createElement("p");
     price.className = "price";
@@ -182,22 +237,25 @@ function renderCatalog(){
   });
 }
 
-function addToCart(id){
+function addToCart(id) {
   const product = products.find(p => p.id === id);
   if (!product) return;
+
   cart[id] = (cart[id] || 0) + 1;
   renderCart();
 }
 
-function renderCart(){
+function renderCart() {
   const el = document.getElementById("cart");
   el.replaceChildren();
+
   let total = 0;
   let hasItems = false;
 
   products.forEach(product => {
     const quantity = cart[product.id] || 0;
     if (!quantity) return;
+
     hasItems = true;
     total += quantity * product.price;
 
@@ -209,7 +267,9 @@ function renderCart(){
     minus.textContent = "−";
     minus.onclick = () => {
       cart[product.id]--;
-      if (cart[product.id] <= 0) delete cart[product.id];
+      if (cart[product.id] <= 0) {
+        delete cart[product.id];
+      }
       renderCart();
     };
 
@@ -222,12 +282,16 @@ function renderCart(){
     el.append(row);
   });
 
-  if (!hasItems) el.textContent = "Корзина пуста.";
-  document.getElementById("cartTotal").textContent = "Итого: " + total + " баллов";
+if (!hasItems) {
+    el.textContent = "Корзина пуста.";
+  }
+
+  document.getElementById("cartTotal").textContent =
+    "Итого: " + total + " баллов";
 }
 
 // Локальная история
-function getOrders(){
+function getOrders() {
   try {
     return JSON.parse(localStorage.getItem("zoriqOrders") || "[]");
   } catch {
@@ -235,9 +299,10 @@ function getOrders(){
   }
 }
 
-function renderHistory(){
+function renderHistory() {
   const el = document.getElementById("orderHistory");
   el.replaceChildren();
+
   const orders = getOrders();
 
   if (!orders.length) {
@@ -248,25 +313,30 @@ function renderHistory(){
   orders.forEach(order => {
     const card = document.createElement("div");
     card.className = "card";
+
     const title = document.createElement("strong");
     title.textContent = "Заказ " + order.id;
+
     const date = document.createElement("p");
     date.className = "muted";
     date.textContent = order.date;
+
     const items = document.createElement("p");
     items.textContent = (order.items || []).map(i =>
-
-i.name + " × " + i.quantity
+      i.name + " × " + i.quantity
     ).join(", ");
+
     const total = document.createElement("p");
     total.className = "price";
     total.textContent = "Итого: " + order.total + " баллов";
+
     card.append(title, date, items, total);
     el.append(card);
   });
 }
 
-async function makeOrder(){
+// Создание тестового заказа
+async function makeOrder() {
   const items = products
     .filter(p => cart[p.id])
     .map(p => ({id:p.id, quantity:cart[p.id]}));
@@ -301,56 +371,84 @@ async function makeOrder(){
     cart = {};
     renderCart();
     renderHistory();
+
     document.getElementById("orderResult").textContent =
       "Тестовый заказ создан: " + order.id;
+
   } catch(error) {
     alert("Не удалось создать заказ: " + error.message);
   }
 }
 
 // Админ-панель
-async function openAdmin(){
+async function openAdmin() {
   document.getElementById("store").classList.add("hidden");
   document.getElementById("admin").classList.remove("hidden");
-  document.getElementById("adminStatus").textContent = "Проверяем владельца...";
+  document.getElementById("adminStatus").textContent =
+    "Проверяем владельца...";
 
   try {
-    await api("/api/admin-check", {method:"POST",body:"{}"});
-    document.getElementById("adminStatus").textContent = "Доступ владельца подтверждён.";
+    await api("/api/admin-check", {
+      method:"POST",
+      body:"{}"
+    });
+
+    document.getElementById("adminStatus").textContent =
+      "Доступ владельца подтверждён.";
+
     showTab("dashboard");
-    await Promise.all([loadDashboard(), loadOrders(), loadProducts()]);
+
+    await Promise.all([
+      loadDashboard(),
+      loadOrders(),
+      loadProducts()
+    ]);
+
   } catch(error) {
     document.getElementById("adminStatus").textContent =
       "Доступ запрещён: " + error.message;
+
     document.getElementById("admin").classList.add("hidden");
     document.getElementById("store").classList.remove("hidden");
+
     alert("Панель доступна только владельцу через Telegram.");
   }
 }
 
-function closeAdmin(){
+function closeAdmin() {
   document.getElementById("admin").classList.add("hidden");
   document.getElementById("store").classList.remove("hidden");
+  loadCatalog();
 }
 
-function showTab(name){
+function showTab(name) {
   ["dashboard","orders","products","settings"].forEach(tab => {
-    document.getElementById("tab-" + tab).classList.toggle("hidden", tab !== name);
+    document.getElementById("tab-" + tab)
+      .classList.toggle("hidden", tab !== name);
   });
 }
 
-async function loadDashboard(){
+// Статистика
+async function loadDashboard() {
   try {
     const data = await api("/api/admin/stats");
-    document.getElementById("statOrders").textContent = data.ordersCount;
-    document.getElementById("statPoints").textContent = data.totalPoints;
-    document.getElementById("statProducts").textContent = data.productsCount;
+
+    document.getElementById("statOrders").textContent =
+      data.ordersCount;
+
+    document.getElementById("statPoints").textContent =
+      data.totalPoints;
+
+    document.getElementById("statProducts").textContent =
+      data.productsCount;
+
   } catch(error) {
     alert("Ошибка статистики: " + error.message);
   }
 }
 
-async function loadOrders(){
+// Заказы
+async function loadOrders() {
   const el = document.getElementById("adminOrders");
   el.textContent = "Загрузка...";
 
@@ -386,12 +484,14 @@ async function loadOrders(){
       card.append(title, date, items, total);
       el.append(card);
     });
+
   } catch(error) {
     el.textContent = "Ошибка: " + error.message;
   }
 }
 
-async function loadProducts(){
+// Управление товарами
+async function loadProducts() {
   const el = document.getElementById("adminProducts");
   el.textContent = "Загрузка...";
 
@@ -427,16 +527,21 @@ async function loadProducts(){
       el.append(card);
     });
 
-    if (!data.products.length) el.textContent = "Товаров пока нет.";
+    if (!data.products.length) {
+      el.textContent = "Товаров пока нет.";
+    }
+
   } catch(error) {
     el.textContent = "Ошибка: " + error.message;
   }
 }
 
-async function addProduct(){
+// Добавление товара
+async function addProduct() {
   const name = document.getElementById("newName").value.trim();
   const price = Number(document.getElementById("newPrice").value);
-  const description = document.getElementById("newDescription").value.trim();
+  const description =
+    document.getElementById("newDescription").value.trim();
 
   if (!name || !Number.isInteger(price) || price < 0) {
     alert("Введи название и целую неотрицательную цену.");
@@ -455,21 +560,32 @@ async function addProduct(){
 
     await loadProducts();
     await loadDashboard();
+    await loadCatalog();
+
     alert("Демо-товар добавлен.");
+
   } catch(error) {
     alert("Ошибка: " + error.message);
   }
 }
 
-async function editProduct(product){
+// Изменение товара
+async function editProduct(product) {
   const name = prompt("Новое название:", product.name);
   if (name === null) return;
 
-  const priceText = prompt("Новая цена в тестовых баллах:", product.price);
+  const priceText = prompt(
+    "Новая цена в тестовых баллах:",
+    product.price
+  );
   if (priceText === null) return;
 
   const price = Number(priceText);
-  const description = prompt("Новое описание:", product.description || "");
+
+  const description = prompt(
+    "Новое описание:",
+    product.description || ""
+  );
   if (description === null) return;
 
   if (!name.trim() || !Number.isInteger(price) || price < 0) {
@@ -478,46 +594,63 @@ async function editProduct(product){
   }
 
   try {
-    await api("/api/admin/products/" + encodeURIComponent(product.id), {
-      method:"PUT",
-      body:JSON.stringify({name,price,description})
-    });
+    await api(
+      "/api/admin/products/" + encodeURIComponent(product.id),
+      {
+        method:"PUT",
+        body:JSON.stringify({name,price,description})
+      }
+    );
+
     await loadProducts();
     await loadDashboard();
+    await loadCatalog();
+
     alert("Товар изменён.");
+
   } catch(error) {
     alert("Ошибка: " + error.message);
   }
 }
 
-async function deleteProduct(id){
+// Удаление товара
+async function deleteProduct(id) {
   if (!confirm("Удалить этот демо-товар?")) return;
 
   try {
-    await api("/api/admin/products/" + encodeURIComponent(id), {
-      method:"DELETE"
-    });
+    await api(
+      "/api/admin/products/" + encodeURIComponent(id),
+      {method:"DELETE"}
+    );
+
     await loadProducts();
     await loadDashboard();
+    await loadCatalog();
+
     alert("Товар удалён.");
+
   } catch(error) {
     alert("Ошибка: " + error.message);
   }
 }
 
-async function checkServer(){
+// Проверка сервера
+async function checkServer() {
   try {
     const response = await fetch("/health");
     const data = await response.json();
+
     document.getElementById("serverStatus").textContent =
       data.ok ? "Работает" : "Не отвечает";
+
   } catch {
-    document.getElementById("serverStatus").textContent = "Недоступен";
+    document.getElementById("serverStatus").textContent =
+      "Недоступен";
   }
 }
 
-renderCatalog();
-renderCart();
+// Запуск приложения
+loadCatalog();
 renderHistory();
 checkServer();
 </script>
