@@ -1,703 +1,1016 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080f20">
 <title>ZoriqStars</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
 :root {
-  --bg: #080d1b;
-  --panel: #111a2e;
-  --panel2: #17233c;
-  --gold: #f5c451;
-  --text: #f4f6fb;
-  --muted: #9ba8bf;
-  --border: rgba(255,255,255,.09);
-  --green: #55d69e;
-  --red: #ff7373;
+  --bg:#080f20;
+  --panel:#111d33;
+  --panel2:#182742;
+  --gold:#f4c45e;
+  --gold2:#dca83e;
+  --text:#f4f6fc;
+  --muted:#91a1bb;
+  --border:rgba(255,255,255,.09);
+  --green:#52d6a0;
+  --red:#ff737d;
+  --radius:18px;
 }
-* { box-sizing: border-box; }
+
+* {
+  box-sizing:border-box;
+}
+
 body {
-  margin: 0;
-  padding: 18px;
-  background: radial-gradient(circle at top, #17264a 0, var(--bg) 48%);
-  color: var(--text);
-  font-family: Arial, sans-serif;
+  margin:0;
+  min-height:100vh;
+  padding:0 0 35px;
+  background:
+    radial-gradient(ellipse at top,#1b3154 0%,transparent 48%),
+    var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
 }
-button, input, textarea { font: inherit; }
-button { cursor: pointer; }
+
+button,input,textarea {
+  font:inherit;
+}
+
+button {
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
 header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 22px;
+  padding:20px 18px;
+  background:rgba(13,25,45,.85);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
 }
-.logo { font-size: 25px; font-weight: 800; }
-.logo span { color: var(--gold); }
-.badge {
-  color: var(--gold);
-  border: 1px solid rgba(245,196,81,.35);
-  border-radius: 20px;
-  padding: 7px 11px;
-  font-size: 12px;
+
+.logo {
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-1px;
 }
-h1 { font-size: 25px; margin: 20px 0 7px; }
-.subtitle { color: var(--muted); margin: 0 0 20px; }
+
+.logo span {
+  color:var(--gold);
+}
+
+.header-badge {
+  color:var(--gold);
+  border:1px solid rgba(244,196,94,.3);
+  background:rgba(244,196,94,.08);
+  border-radius:30px;
+  padding:7px 10px;
+  font-size:10px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+main {
+  max-width:850px;
+  margin:auto;
+  padding:18px;
+}
+
+.hero {
+  padding:22px;
+  border:1px solid rgba(244,196,94,.18);
+  border-radius:22px;
+  background:linear-gradient(135deg,#1d3152,#111d33);
+  margin:5px 0 25px;
+}
+
+.hero h1 {
+  margin:0 0 9px;
+  font-size:26px;
+}
+
+.hero p {
+  margin:0;
+  color:var(--muted);
+  line-height:1.5;
+}
+
 .section-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 26px 0 13px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin:26px 0 13px;
 }
-.section-title h2 { font-size: 19px; margin: 0; }
+
+.section-title h2 {
+  font-size:19px;
+  margin:0;
+}
+
+.muted {
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+
 .card {
-  background: linear-gradient(145deg, var(--panel2), var(--panel));
-  border: 1px solid var(--border);
-  border-radius: 17px;
-  padding: 16px;
-  margin-bottom: 13px;
+  background:linear-gradient(145deg,var(--panel2),var(--panel));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin:12px 0;
 }
-.product {
-  display: flex;
-  align-items: center;
-  gap: 13px;
+
+.product-card {
+  display:flex;
+  align-items:center;
+  gap:13px;
 }
+
 .product-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  display: grid;
-  place-items: center;
-  background: rgba(245,196,81,.12);
-  font-size: 25px;
+  width:52px;
+  height:52px;
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+  border-radius:16px;
+  background:rgba(244,196,94,.12);
+  font-size:25px;
 }
-.product-info { flex: 1; min-width: 0; }
-.product-info h3 { margin: 0 0 5px; font-size: 16px; }
-.product-info p { margin: 0; color: var(--muted); font-size: 13px; }
-.price { color: var(--gold); font-weight: 700; margin-top: 7px; }
+
+.product-info {
+  flex:1;
+  min-width:0;
+}
+
+.product-info h3 {
+  font-size:15px;
+  margin:0 0 6px;
+  overflow-wrap:anywhere;
+}
+
+.product-info p {
+  color:var(--muted);
+  font-size:12px;
+  margin:0;
+  line-height:1.4;
+}
+
+.price {
+  color:var(--gold);
+  font-weight:800;
+  margin-top:8px;
+}
+
 .btn {
-  border: 0;
-  border-radius: 12px;
-  padding: 11px 15px;
-  font-weight: 700;
-  color: #151515;
-  background: var(--gold);
+  border:0;
+  border-radius:12px;
+  padding:12px 15px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#171717;
+  font-weight:800;
+  transition:transform .15s,opacity .15s;
 }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn:active {
+  transform:scale(.97);
+}
+
+.btn:disabled {
+  opacity:.45;
+  cursor:not-allowed;
+}
+
 .btn-secondary {
-  color: var(--text);
-  background: #293752;
+  background:#293b59;
+  color:white;
 }
-.btn-danger { color: white; background: #a83e4c; }
-.btn-small { padding: 8px 11px; font-size: 12px; }
-.full { width: 100%; }
-input, textarea {
-  width: 100%;
-  padding: 12px;
-  margin: 7px 0 13px;
-  color: white;
-  background: #0b1426;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  outline: none;
+
+.btn-danger {
+  background:#a83e4c;
+  color:white;
 }
-textarea { min-height: 75px; resize: vertical; }
-label { color: var(--muted); font-size: 13px; }
-.muted { color: var(--muted); font-size: 13px; }
-.row { display: flex; gap: 9px; align-items: center; }
-.row > * { flex: 1; }
-.hidden { display: none !important; }
+
+.btn-small {
+  padding:9px 11px;
+  font-size:12px;
+}
+
+.btn-full {
+  width:100%;
+  margin-top:8px;
+}
+
+input,textarea {
+  display:block;
+  width:100%;
+  padding:13px;
+  margin:7px 0 14px;
+  color:white;
+  background:#0a1629;
+  border:1px solid #344966;
+  border-radius:11px;
+  outline:none;
+}
+
+input:focus,textarea:focus {
+  border-color:var(--gold);
+}
+
+textarea {
+  min-height:80px;
+  resize:vertical;
+}
+
+label {
+  color:var(--muted);
+  font-size:12px;
+}
+
+.row {
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.row > * {
+  min-width:0;
+}
+
+.between {
+  justify-content:space-between;
+}
+
+.hidden {
+  display:none!important;
+}
+
 .empty {
-  text-align: center;
-  color: var(--muted);
-  padding: 25px 10px;
+  padding:22px 10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
 }
+
+.cart-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.cart-row:last-child {
+  border-bottom:0;
+}
+
+.quantity {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.quantity button {
+  width:32px;
+  height:32px;
+  padding:0;
+  border:0;
+  border-radius:9px;
+  background:#293b59;
+  color:white;
+  font-size:19px;
+}
+
 .total {
-  display: flex;
-  justify-content: space-between;
-  font-size: 18px;
-  font-weight: 700;
-  margin: 15px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:17px 0;
+  font-size:17px;
+  font-weight:bold;
 }
-.total strong { color: var(--gold); }
-#adminPanel { margin-top: 28px; }
-.tabs {
-  display: flex;
-  gap: 7px;
-  overflow-x: auto;
-  padding-bottom: 10px;
+
+.total strong {
+  color:var(--gold);
 }
-.tab {
-  white-space: nowrap;
-  background: #1b2943;
-  color: white;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-.tab.active {
-  background: var(--gold);
-  color: #171717;
-}
-.stat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.stat strong {
-  display: block;
-  color: var(--gold);
-  font-size: 23px;
-  margin-top: 8px;
-}
-.admin-item {
-  border-bottom: 1px solid var(--border);
-  padding: 12px 0;
-}
-.admin-item:last-child { border: 0; }
-.status {
-  display: inline-block;
-  font-size: 11px;
-  padding: 5px 8px;
-  border-radius: 20px;
-  color: var(--green);
-  background: rgba(85,214,158,.12);
-}
+
 .notice {
-  background: rgba(245,196,81,.09);
-  border: 1px solid rgba(245,196,81,.25);
-  color: #f5d98e;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 14px;
+  padding:13px;
+  border-radius:12px;
+  border:1px solid rgba(244,196,94,.25);
+  background:rgba(244,196,94,.08);
+  color:#f3d99e;
+  font-size:12px;
+  line-height:1.6;
+  margin:12px 0;
 }
+
+.admin-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin:25px 0 15px;
+}
+
+.admin-header h2 {
+  font-size:20px;
+  margin:0;
+}
+
+.admin-status {
+  padding:12px;
+  border-radius:12px;
+  background:#13243b;
+  color:var(--muted);
+  font-size:12px;
+  margin:12px 0;
+}
+
+.tabs {
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:5px 0 12px;
+  scrollbar-width:thin;
+}
+
+.tab {
+  flex:0 0 auto;
+  padding:11px 13px;
+  border-radius:11px;
+  background:#1b2b45;
+  border:1px solid var(--border);
+  color:white;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.tab.active {
+  background:var(--gold);
+  color:#171717;
+}
+
+.stat-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.stat-card {
+  padding:17px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#1a2d4c,#111d33);
+  border:1px solid var(--border);
+}
+
+.stat-label {
+  color:var(--muted);
+  font-size:12px;
+}
+
+.stat-value {
+  color:var(--gold);
+  font-size:25px;
+  font-weight:900;
+  margin-top:9px;
+  overflow-wrap:anywhere;
+}
+
+.admin-item {
+  padding:13px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.admin-item:last-child {
+  border-bottom:0;
+}
+
+.status {
+  display:inline-block;
+  color:var(--green);
+  background:rgba(82,214,160,.12);
+  border-radius:30px;
+  padding:6px 9px;
+  font-size:11px;
+}
+
 footer {
-  text-align: center;
-  color: var(--muted);
-  font-size: 12px;
-  padding: 25px 0 10px;
+  padding:25px 10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+}
+
+@media(max-width:390px) {
+  main {
+    padding:13px;
+  }
+
+  .product-card {
+    gap:9px;
+  }
+
+  .product-icon {
+    width:44px;
+    height:44px;
+  }
+
+  .product-card > button {
+    padding:10px;
+    font-size:11px;
+  }
+
+  .hero h1 {
+    font-size:23px;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <header>
   <div class="logo">Zoriq<span>Stars</span></div>
-  <div class="badge">TELEGRAM MINI APP</div>
+  <div class="header-badge">DEMO PROJECT</div>
 </header>
 
-<main id="mainApp">
-  <h1>Добро пожаловать ⭐</h1>
-  <p class="subtitle">Выбери товар и добавь его в корзину.</p>
+<main>
+
+<section id="store">
+
+  <div class="hero">
+    <h1>Добро пожаловать ⭐</h1>
+    <p>Выбирай товары, добавляй их в корзину и создавай демонстрационные заказы.</p>
+  </div>
 
   <div class="section-title">
-    <h2>Каталог</h2>
-  </div>
-  <div id="catalog">
-    <div class="empty">Загрузка каталога...</div>
+    <h2>⭐ Каталог</h2>
+    <span class="muted" id="catalogStatus">Загрузка...</span>
   </div>
 
+  <div id="catalog"></div>
+
   <div class="section-title">
-    <h2>Корзина 🛒</h2>
+    <h2>🛒 Корзина</h2>
   </div>
+
   <div class="card">
-    <div id="cartItems" class="empty">Корзина пуста</div>
-    <div id="cartTotal" class="total hidden">
-      <span>Итого</span><strong id="totalValue">0 ⭐</strong>
+    <div id="cart">
+      <div class="empty">Корзина пока пуста</div>
     </div>
-    <button class="btn full" id="orderButton" onclick="makeOrder()" disabled>
+
+    <div class="total">
+      <span>Итого</span>
+      <strong id="cartTotal">0 баллов</strong>
+    </div>
+
+    <button class="btn btn-full" id="orderButton" onclick="makeOrder()">
       Создать тестовый заказ
+    </button>
+
+    <p id="orderResult" class="muted"></p>
+  </div>
+
+  <div class="section-title">
+    <h2>📦 История заказов</h2>
+  </div>
+
+  <div id="orderHistory">
+    <div class="empty">Заказов пока нет</div>
+  </div>
+
+  <div class="card">
+    <h3>Панель владельца</h3>
+    <p class="muted">Доступ проверяется сервером через Telegram.</p>
+    <button class="btn btn-full" onclick="openAdmin()">
+      🔐 Открыть панель владельца
     </button>
   </div>
 
-  <div class="section-title">
-    <h2>Мои заказы</h2>
-  </div>
-  <div id="history">
-    <div class="empty">Пока заказов нет</div>
-  </div>
-</main>
-
-<section id="adminPanel" class="hidden">
-  <div class="section-title">
-    <h2>Панель администратора</h2>
-    <button class="btn btn-secondary btn-small" onclick="closeAdmin()">Закрыть</button>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('dashboard',this)">Обзор</button>
-    <button class="tab" onclick="showTab('orders',this)">Заказы</button>
-    <button class="tab" onclick="showTab('products',this)">Товары</button>
-    <button class="tab" onclick="showTab('withdraw',this)">Вывод средств</button>
-    <button class="tab" onclick="showTab('settings',this)">Настройки</button>
-  </div>
-
-  <div id="tab-dashboard">
-    <div class="stat-grid">
-      <div class="card stat">
-        <span class="muted">Всего заказов</span>
-        <strong id="statOrders">—</strong>
-      </div>
-      <div class="card stat">
-        <span class="muted">Товары</span>
-        <strong id="statProducts">—</strong>
-      </div>
-      <div class="card stat">
-        <span class="muted">Сумма заказов</span>
-        <strong id="statTotal">—</strong>
-      </div>
-      <div class="card stat">
-        <span class="muted">Сервер</span>
-        <strong id="statServer">—</strong>
-      </div>
-    </div>
-    <button class="btn btn-secondary full" onclick="loadDashboard()">Обновить данные</button>
-  </div>
-
-  <div id="tab-orders" class="hidden">
-    <input id="orderSearch" placeholder="Поиск заказа по ID..." oninput="filterOrders()">
-    <div id="adminOrders"></div>
-  </div>
-
-  <div id="tab-products" class="hidden">
-    <div class="card">
-      <h3 id="productFormTitle">Добавить товар</h3>
-      <input id="productId" type="hidden">
-      <label>Название товара</label>
-      <input id="productName" placeholder="Например, Telegram Stars">
-      <label>Цена</label>
-      <input id="productPrice" type="number" min="0" placeholder="100">
-      <label>Описание</label>
-      <textarea id="productDescription" placeholder="Описание товара"></textarea>
-      <button class="btn full" onclick="saveProduct()">Сохранить товар</button>
-      <button class="btn btn-secondary full" style="margin-top:8px" onclick="resetProductForm()">Очистить форму</button>
-    </div>
-    <div id="adminProducts"></div>
-  </div>
-
-  <div id="tab-withdraw" class="hidden">
-    <div class="notice">
-      Демонстрационный раздел. Здесь можно создать тестовую заявку в условных баллах.
-      Реальные деньги, переводы и платежи не используются.
-      Заявки сохраняются только в этом браузере.
-    </div>
-    <div class="card">
-      <h3>Тестовая заявка</h3>
-      <label>Количество тестовых баллов</label>
-      <input id="withdrawAmount" type="number" min="1" step="1" placeholder="Например, 100">
-      <label>Комментарий</label>
-      <textarea id="withdrawNote" placeholder="Необязательный комментарий"></textarea>
-      <button class="btn full" onclick="createDemoWithdrawal()">Создать тестовую заявку</button>
-    </div>
-    <h3>История тестовых заявок</h3>
-    <div id="withdrawHistory"></div>
-  </div>
-
-<div id="tab-settings" class="hidden">
-    <div class="card">
-      <h3>Настройки</h3>
-      <p class="muted">Состояние подключения к серверу:</p>
-      <p id="serverStatus">Проверка...</p>
-      <button class="btn btn-secondary full" onclick="checkServer()">Проверить сервер</button>
-    </div>
-  </div>
 </section>
 
-<footer>ZoriqStars · Демонстрационный проект</footer>
+<section id="admin" class="hidden">
+
+  <div class="admin-header">
+    <h2>⭐ Панель владельца</h2>
+    <button class="btn btn-secondary btn-small" onclick="closeAdmin()">Назад</button>
+  </div>
+
+  <div id="adminStatus" class="admin-status">Проверка доступа...</div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard" onclick="showTab('dashboard',this)">📊 Главная</button>
+    <button class="tab" data-tab="orders" onclick="showTab('orders',this)">📦 Заказы</button>
+    <button class="tab" data-tab="products" onclick="showTab('products',this)">🛍 Товары</button>
+    <button class="tab" data-tab="withdraw" onclick="showTab('withdraw',this)">⭐ Заявки</button>
+    <button class="tab" data-tab="settings" onclick="showTab('settings',this)">⚙️ Настройки</button>
+  </nav>
+
+  <section id="tab-dashboard">
+
+    <h2>Статистика</h2>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Всего заказов</div>
+        <div class="stat-value" id="statOrders">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Сумма баллов</div>
+        <div class="stat-value" id="statPoints">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Демо-товары</div>
+        <div class="stat-value" id="statProducts">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Сервер</div>
+        <div class="stat-value" id="statServer">—</div>
+      </div>
+    </div>
+
+    <button class="btn btn-full" onclick="loadDashboard()">Обновить статистику</button>
+
+  </section>
+
+  <section id="tab-orders" class="hidden">
+
+    <h2>📦 Заказы</h2>
+
+    <input
+      id="orderSearch"
+      placeholder="Поиск по номеру заказа..."
+      oninput="filterOrders()"
+    >
+
+    <button class="btn btn-secondary btn-full" onclick="loadOrders()">Обновить заказы</button>
+
+    <div id="adminOrders">
+      <div class="empty">Загрузка заказов...</div>
+    </div>
+
+  </section>
+
+  <section id="tab-products" class="hidden">
+
+    <h2>🛍 Управление товарами</h2>
+
+    <div class="card">
+
+      <h3 id="productFormTitle">Добавить товар</h3>
+
+      <input id="editProductId" type="hidden">
+
+      <label>Название товара</label>
+      <input id="newName" maxlength="60" placeholder="Название товара">
+
+      <label>Цена в тестовых баллах</label>
+      <input id="newPrice" type="number" min="0" max="1000000" step="1" placeholder="Например, 100">
+
+      <label>Описание</label>
+      <textarea id="newDescription" maxlength="300" placeholder="Описание товара"></textarea>
+
+      <button class="btn btn-full" onclick="saveProduct()">Сохранить товар</button>
+      <button class="btn btn-secondary btn-full" onclick="resetProductForm()">Очистить форму</button>
+
+    </div>
+
+    <h3>Список товаров</h3>
+
+    <div id="adminProducts">
+      <div class="empty">Загрузка товаров...</div>
+    </div>
+
+  </section>
+
+  <section id="tab-withdraw" class="hidden">
+
+    <h2>⭐ Тестовые заявки</h2>
+
+    <div class="notice">
+      Это демонстрационный раздел. Здесь используются только условные баллы.
+      Реальные деньги, платежи и переводы не проводятся.
+      Заявки хранятся только в браузере этого устройства.
+    </div>
+
+    <div class="card">
+
+      <h3>Создать заявку</h3>
+
+      <label>Количество тестовых баллов</label>
+      <input id="withdrawAmount" type="number" min="1" step="1" placeholder="Например, 100">
+
+      <label>Комментарий</label>
+      <textarea id="withdrawNote" maxlength="200" placeholder="Необязательный комментарий"></textarea>
+
+      <button class="btn btn-full" onclick="createDemoWithdrawal()">
+        Создать тестовую заявку
+      </button>
+
+    </div>
+
+    <h3>История заявок</h3>
+
+    <div id="withdrawHistory"></div>
+
+  </section>
+
+  <section id="tab-settings" class="hidden">
+
+    <h2>⚙️ Настройки</h2>
+
+    <div class="card">
+      <p>Проект: <strong>ZoriqStars</strong></p>
+      <p>Режим: <strong>Демонстрационный</strong></p>
+      <p>Платежи: <strong>Отключены</strong></p>
+      <p>Авторизация: <strong>Telegram Web App</strong></p>
+      <p>Сервер: <strong id="serverStatus">Проверка...</strong></p>
+      <p>База данных: <strong id="databaseStatus">Проверка...</strong></p>
+    </div>
+
+    <button class="btn btn-full" onclick="checkServer()">Проверить сервер</button>
+
+    <button class="btn btn-secondary btn-full" onclick="closeAdmin()">Вернуться в каталог</button>
+
+  </section>
+
+  <button class="btn btn-secondary btn-full" onclick="closeAdmin()">Закрыть панель владельца</button>
+
+</section>
+
+</main>
+
+<footer>
+  ZoriqStars · Демонстрационный проект
+</footer>
 
 <script>
+"use strict";
+
 const tg = window.Telegram?.WebApp;
+
 if (tg) {
   tg.ready();
   tg.expand();
 }
 
 const API = "";
-let products = [];
-let cart = [];
-let adminOrdersCache = [];
 
-function api(path, options = {}) {
+const defaultProducts = [
+  {
+    id:"stars",
+    name:"Telegram Stars",
+    price:100,
+    description:"Демонстрационный товар. Тестовые баллы."
+  },
+  {
+    id:"premium",
+    name:"Telegram Premium",
+    price:300,
+    description:"Демонстрационный товар. Тестовые баллы."
+  }
+];
+
+let products = [...defaultProducts];
+let cart = {};
+let adminOrdersCache = [];
+let adminVerified = false;
+
+function getInitData() {
+  return tg?.initData || "";
+}
+
+async function api(path, options = {}) {
   const headers = {
-    "Content-Type": "application/json",
+    "Content-Type":"application/json",
+    "X-Telegram-Init-Data":getInitData(),
     ...(options.headers || {})
   };
 
-  if (tg?.initData) {
-    headers["X-Telegram-Init-Data"] = tg.initData;
-  }
-
-  return fetch(API + path, {
+  const response = await fetch(API + path, {
     ...options,
     headers
-  }).then(async response => {
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || data.message || "Ошибка сервера");
-    }
-    return data;
   });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "Ошибка сервера: " + response.status);
+  }
+
+  return data;
 }
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
   })[char]);
 }
 
+function formatDate(value) {
+  if (!value) return "Дата не указана";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString("ru-RU");
+}
+
+// КАТАЛОГ
+
 async function loadCatalog() {
-  const container = document.getElementById("catalog");
+  const status = document.getElementById("catalogStatus");
+
+  status.textContent = "Загрузка...";
+
   try {
     const data = await api("/api/products");
-    products = Array.isArray(data) ? data : (data.products || []);
-    renderCatalog();
+
+    if (!data.ok || !Array.isArray(data.products)) {
+      throw new Error("Неверный формат каталога");
+    }
+
+    products = data.products;
+
+    status.textContent = "Синхронизирован";
+
   } catch (error) {
-    container.innerHTML = `<div class="empty">Не удалось загрузить каталог: ${escapeHtml(error.message)}</div>`;
+    console.error("Каталог:", error);
+
+    status.textContent = "Запасной режим";
+
+    if (!products.length) {
+      products = [...defaultProducts];
+    }
   }
+
+  Object.keys(cart).forEach(id => {
+    if (!products.some(product => product.id === id)) {
+      delete cart[id];
+    }
+  });
+
+  renderCatalog();
+  renderCart();
 }
 
 function renderCatalog() {
   const container = document.getElementById("catalog");
+  container.replaceChildren();
 
   if (!products.length) {
-    container.innerHTML = '<div class="empty">Товаров пока нет</div>';
+    container.innerHTML = '<div class="empty">Товаров пока нет.</div>';
     return;
   }
 
-  container.innerHTML = products.map(product => `
-    <div class="card product">
-      <div class="product-icon">⭐</div>
-      <div class="product-info">
-        <h3>${escapeHtml(product.name)}</h3>
-        <p>${escapeHtml(product.description || "")}</p>
-        <div class="price">${Number(product.price)} ⭐</div>
-      </div>
-      <button class="btn btn-small" onclick="addToCart('${escapeHtml(product.id)}')">
-        Добавить
-      </button>
-    </div>
-  `).join("");
+  products.forEach(product => {
+    const card = document.createElement("div");
+    card.className = "card product-card";
+
+    const icon = document.createElement("div");
+    icon.className = "product-icon";
+    icon.textContent = "⭐";
+
+    const info = document.createElement("div");
+    info.className = "product-info";
+
+    const name = document.createElement("h3");
+    name.textContent = product.name;
+
+    const description = document.createElement("p");
+    description.textContent = product.description || "";
+
+    const price = document.createElement("div");
+    price.className = "price";
+    price.textContent = Number(product.price) + " баллов";
+
+    info.append(name, description, price);
+
+    const button = document.createElement("button");
+    button.className = "btn btn-small";
+    button.textContent = "Добавить";
+    button.onclick = () => addToCart(product.id);
+
+    card.append(icon, info, button);
+    container.append(card);
+  });
 }
 
+// КОРЗИНА
+
 function addToCart(id) {
-  const product = products.find(item => String(item.id) === String(id));
+  const product = products.find(item => item.id === id);
+
   if (!product) return;
 
-  const existing = cart.find(item => String(item.id) === String(id));
-  if (existing) {
-    existing.quantity++;
-  } else {
-    cart.push({ ...product, quantity: 1 });
-  }
+  cart[id] = (cart[id] || 0) + 1;
+
   renderCart();
 }
 
 function changeQuantity(id, change) {
-  const item = cart.find(product => String(product.id) === String(id));
-  if (!item) return;
+  if (!cart[id]) return;
 
-  item.quantity += change;
-  if (item.quantity <= 0) {
-    cart = cart.filter(product => String(product.id) !== String(id));
+  cart[id] += change;
+
+  if (cart[id] <= 0) {
+    delete cart[id];
   }
+
   renderCart();
 }
 
 function renderCart() {
-  const container = document.getElementById("cartItems");
-  const totalBox = document.getElementById("cartTotal");
+  const container = document.getElementById("cart");
+  const totalElement = document.getElementById("cartTotal");
   const orderButton = document.getElementById("orderButton");
 
-  if (!cart.length) {
-    container.innerHTML = "Корзина пуста";
-    totalBox.classList.add("hidden");
-    orderButton.disabled = true;
+  container.replaceChildren();
+
+  let total = 0;
+  let hasItems = false;
+
+  products.forEach(product => {
+    const quantity = cart[product.id] || 0;
+
+    if (!quantity) return;
+
+    hasItems = true;
+
+    total += quantity * Number(product.price);
+
+    const row = document.createElement("div");
+    row.className = "cart-row";
+
+    const info = document.createElement("div");
+
+    const name = document.createElement("strong");
+    name.textContent = product.name;
+
+    const price = document.createElement("div");
+    price.className = "muted";
+    price.textContent = Number(product.price) + " × " + quantity;
+
+    info.append(name, price);
+
+    const controls = document.createElement("div");
+    controls.className = "quantity";
+
+    const minus = document.createElement("button");
+    minus.textContent = "−";
+    minus.onclick = () => changeQuantity(product.id, -1);
+
+    const count = document.createElement("strong");
+    count.textContent = quantity;
+
+    const plus = document.createElement("button");
+    plus.textContent = "+";
+    plus.onclick = () => changeQuantity(product.id, 1);
+
+    controls.append(minus, count, plus);
+
+    row.append(info, controls);
+    container.append(row);
+  });
+
+  if (!hasItems) {
+    container.innerHTML = '<div class="empty">Корзина пока пуста</div>';
+  }
+
+  totalElement.textContent = total + " баллов";
+  orderButton.disabled = !hasItems;
+}
+
+// ИСТОРИЯ ЗАКАЗОВ
+
+function getOrders() {
+  try {
+    const value = JSON.parse(localStorage.getItem("zoriqOrders") || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+function renderHistory() {
+  const container = document.getElementById("orderHistory");
+  container.replaceChildren();
+
+  const orders = getOrders();
+
+  if (!orders.length) {
+    container.innerHTML = '<div class="empty">Заказов пока нет.</div>';
     return;
   }
 
-  container.className = "";
-  container.innerHTML = cart.map(item => `
-    <div class="admin-item">
-      <div class="row">
-        <div>
-          <strong>${escapeHtml(item.name)}</strong>
-          <div class="muted">${Number(item.price)} ⭐ за единицу</div>
-        </div>
-        <div class="row">
-          <button class="btn btn-secondary btn-small" onclick="changeQuantity('${escapeHtml(item.id)}',-1)">−</button>
-          <strong>${item.quantity}</strong>
-          <button class="btn btn-secondary btn-small" onclick="changeQuantity('${escapeHtml(item.id)}',1)">+</button>
-        </div>
-      </div>
-    </div>
-  `).join("");
+  orders.forEach(order => {
+    const card = document.createElement("div");
+    card.className = "card";
 
-  const total = cart.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
-  document.getElementById("totalValue").textContent = total + " ⭐";
-  totalBox.classList.remove("hidden");
-  orderButton.disabled = false;
+    const title = document.createElement("strong");
+    title.textContent = "Заказ " + order.id;
+
+    const date = document.createElement("p");
+    date.className = "muted";
+    date.textContent = order.date;
+
+    const items = document.createElement("p");
+    items.className = "muted";
+    items.textContent = (order.items || []).map(item =>
+      item.name + " × " + item.quantity
+    ).join(", ");
+
+    const total = document.createElement("div");
+    total.className = "price";
+    total.textContent = "Итого: " + order.total + " баллов";
+
+    card.append(title, date, items, total);
+    container.append(card);
+  });
 }
 
+// СОЗДАНИЕ ЗАКАЗА
+
 async function makeOrder() {
-  if (!cart.length) return;
+  const items = products
+    .filter(product => cart[product.id])
+    .map(product => ({
+      id:product.id,
+      quantity:cart[product.id]
+    }));
+
+  if (!items.length) {
+    alert("Сначала добавь товар в корзину.");
+    return;
+  }
+
+  if (!getInitData()) {
+    alert("Открой приложение через Telegram, чтобы создать серверный тестовый заказ.");
+    return;
+  }
 
   const button = document.getElementById("orderButton");
   button.disabled = true;
 
   try {
-    const items = cart.map(item => ({
-      id: item.id,
-      name: item.name,
-      price: Number(item.price),
-      quantity: item.quantity
-    }));
-
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
     const result = await api("/api/orders", {
-      method: "POST",
-      body: JSON.stringify({
-        items,
-        total,
-        user: tg?.initDataUnsafe?.user || null
-      })
+      method:"POST",
+      body:JSON.stringify({items})
     });
 
-    cart = [];
+    if (!result.ok || !result.order) {
+      throw new Error("Сервер не вернул созданный заказ.");
+    }
+
+    const order = {
+      id:result.order.id,
+      date:formatDate(result.order.date),
+      items:result.order.items,
+      total:result.order.total
+    };
+
+    const oldOrders = getOrders();
+
+    oldOrders.unshift(order);
+
+    localStorage.setItem("zoriqOrders", JSON.stringify(oldOrders));
+
+    cart = {};
+
     renderCart();
+    renderHistory();
+
+    document.getElementById("orderResult").textContent =
+      "Заказ успешно создан: " + order.id;
+
     alert("Тестовый заказ создан!");
-    await loadHistory();
+
   } catch (error) {
-    alert("Не удалось создать заказ: " + error.message);
+    alert("Ошибка создания заказа: " + error.message);
+
   } finally {
     button.disabled = false;
   }
 }
 
-async function loadHistory() {
-  const container = document.getElementById("history");
-  const saved = JSON.parse(localStorage.getItem("zoriqDemoHistory") || "[]");
-
-  if (!saved.length) {
-    container.innerHTML = '<div class="empty">Пока заказов нет</div>';
-    return;
-  }
-
-  container.innerHTML = saved.map(order => `
-    <div class="card">
-      <strong>${escapeHtml(order.id)}</strong>
-      <p class="muted">${escapeHtml(order.date)}</p>
-      <div class="price">${Number(order.total)} ⭐</div>
-    </div>
-  `).join("");
-}
-
-function openAdmin() {
-  document.getElementById("adminPanel").classList.remove("hidden");
-  document.getElementById("adminPanel").scrollIntoView({ behavior: "smooth" });
-  loadDashboard();
-  loadOrders();
-  loadProducts();
-}
-
-function closeAdmin() {
-  document.getElementById("adminPanel").classList.add("hidden");
-}
-
-function showTab(name, button) {
-  ["dashboard", "orders", "products", "withdraw", "settings"].forEach(tab => {
-    document.getElementById("tab-" + tab).classList.toggle("hidden", tab !== name);
-  });
-
-  document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
-  button.classList.add("active");
-
-  if (name === "withdraw") renderWithdrawals();
-  if (name === "orders") loadOrders();
-  if (name === "products") loadProducts();
-}
-
-async function loadDashboard() {
-  try {
-    const stats = await api("/api/admin/stats");
-    document.getElementById("statOrders").textContent = stats.orders ?? stats.totalOrders ?? "—";
-    document.getElementById("statProducts").textContent = stats.products ?? stats.totalProducts ?? "—";
-    document.getElementById("statTotal").textContent = (stats.total ?? stats.revenue ?? "—") + " ⭐";
-    document.getElementById("statServer").textContent = "Онлайн";
-  } catch (error) {
-    document.getElementById("statServer").textContent = "Ошибка";
-    console.error(error);
-  }
-}
-
-async function loadOrders() {
-  const container = document.getElementById("adminOrders");
-  try {
-    const data = await api("/api/admin/orders");
-    adminOrdersCache = Array.isArray(data) ? data : (data.orders || []);
-    filterOrders();
-  } catch (error) {
-    container.innerHTML = `<div class="empty">Ошибка загрузки заказов: ${escapeHtml(error.message)}</div>`;
-  }
-}
-
-function filterOrders() {
-  const query = (document.getElementById("orderSearch").value || "").toLowerCase();
-  const filtered = adminOrdersCache.filter(order =>
-    String(order.id || "").toLowerCase().includes(query)
-  );
-
-  const container = document.getElementById("adminOrders");
-
-  if (!filtered.length) {
-    container.innerHTML = '<div class="empty">Заказы не найдены</div>';
-    return;
-  }
-
-  container.innerHTML = filtered.map(order => `
-    <div class="card">
-      <div class="row">
-        <strong>${escapeHtml(order.id)}</strong>
-        <span class="status">${escapeHtml(order.status || "Новый")}</span>
-      </div>
-      <p class="muted">${escapeHtml(order.created_at || order.date || "")}</p>
-      <div class="price">${Number(order.total || 0)} ⭐</div>
-      <p class="muted">Пользователь: ${escapeHtml(order.user_id || "—")}</p>
-    </div>
-  `).join("");
-}
-
-async function loadProducts() {
-  const container = document.getElementById("adminProducts");
-
-try {
-    const data = await api("/api/admin/products");
-    const list = Array.isArray(data) ? data : (data.products || []);
-
-    if (!list.length) {
-      container.innerHTML = '<div class="empty">Товаров пока нет</div>';
-      return;
-    }
-
-    container.innerHTML = list.map(product => `
-      <div class="card">
-        <strong>${escapeHtml(product.name)}</strong>
-        <div class="price">${Number(product.price)} ⭐</div>
-        <p class="muted">${escapeHtml(product.description || "")}</p>
-        <div class="row">
-          <button class="btn btn-secondary btn-small" onclick="editProduct('${escapeHtml(product.id)}')">Изменить</button>
-          <button class="btn btn-danger btn-small" onclick="deleteProduct('${escapeHtml(product.id)}')">Удалить</button>
-        </div>
-      </div>
-    `).join("");
-  } catch (error) {
-    container.innerHTML = `<div class="empty">Ошибка: ${escapeHtml(error.message)}</div>`;
-  }
-}
-
-async function saveProduct() {
-  const id = document.getElementById("productId").value.trim();
-  const name = document.getElementById("productName").value.trim();
-  const price = Number(document.getElementById("productPrice").value);
-  const description = document.getElementById("productDescription").value.trim();
-
-  if (!name || !Number.isInteger(price) || price < 0) {
-    alert("Укажи название и корректную цену.");
-    return;
-  }
-
-  const payload = { name, price, description };
-
-  try {
-    if (id) {
-      await api("/api/admin/products/" + encodeURIComponent(id), {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-    } else {
-      await api("/api/admin/products", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-    }
-
-    resetProductForm();
-    await loadProducts();
-    await loadCatalog();
-    alert("Товар сохранён.");
-  } catch (error) {
-    alert("Ошибка сохранения: " + error.message);
-  }
-}
-
-function editProduct(id) {
-  const product = products.find(item => String(item.id) === String(id));
-
-  if (!product) {
-    alert("Обнови каталог и попробуй снова.");
-    return;
-  }
-
-  document.getElementById("productId").value = product.id;
-  document.getElementById("productName").value = product.name;
-  document.getElementById("productPrice").value = product.price;
-  document.getElementById("productDescription").value = product.description || "";
-  document.getElementById("productFormTitle").textContent = "Изменить товар";
-  document.getElementById("tab-products").scrollIntoView({ behavior: "smooth" });
-}
-
-async function deleteProduct(id) {
-  if (!confirm("Удалить этот товар?")) return;
-
-  try {
-    await api("/api/admin/products/" + encodeURIComponent(id), {
-      method: "DELETE"
-    });
-
-    await loadProducts();
-    await loadCatalog();
-    alert("Товар удалён.");
-  } catch (error) {
-    alert("Ошибка удаления: " + error.message);
-  }
-}
-
-function resetProductForm() {
-  document.getElementById("productId").value = "";
-  document.getElementById("productName").value = "";
-  document.getElementById("productPrice").value = "";
-  document.getElementById("productDescription").value = "";
-  document.getElementById("productFormTitle").textContent = "Добавить товар";
-}
-
-function createDemoWithdrawal() {
-  const amount = Number(document.getElementById("withdrawAmount").value);
-  const note = document.getElementById("withdrawNote").value.trim();
-
-  if (!Number.isInteger(amount) || amount <= 0) {
-    alert("Введи целое число больше нуля.");
-    return;
-  }
-
-  const list = JSON.parse(localStorage.getItem("zoriqDemoWithdrawals") || "[]");
-
-  const request = {
-    id: "DEMO-W-" + Math.random().toString(36).slice(2, 9).toUpperCase(),
-    amount,
-    note,
-    status: "Тестовая заявка",
-    date: new Date().toLocaleString("ru-RU")
-  };
-
-  list.unshift(request);
-  localStorage.setItem("zoriqDemoWithdrawals", JSON.stringify(list));
-
-  document.getElementById(
+// ПАНЕЛЬ
