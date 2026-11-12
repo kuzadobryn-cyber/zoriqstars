@@ -57,6 +57,11 @@
     }
     #cartCount { color: #ffd76a; }
     #details, #orderResult { display: none; }
+    .order {
+      border-bottom: 1px solid #414b70;
+      padding: 12px 0;
+    }
+    .order:last-child { border-bottom: 0; }
   </style>
 </head>
 <body>
@@ -84,7 +89,7 @@
 
     <div id="details" class="panel">
       <h2 id="detailName"></h2>
-      <p class="muted">Это демонстрационная карточка. Реальная покупка недоступна.</p>
+      <p class="muted">Демонстрационная карточка. Реальная покупка недоступна.</p>
       <button onclick="hideDetails()">Назад к товарам</button>
     </div>
 
@@ -99,8 +104,13 @@
     <div id="orderResult" class="panel">
       <h2>✅ Тестовый заказ создан!</h2>
       <p id="orderText"></p>
-      <p class="muted">Это учебная запись. Деньги не списываются, оплата не производится.</p>
+      <p class="muted">Это учебная запись. Деньги не списываются.</p>
       <button onclick="closeOrder()">Продолжить</button>
+    </div>
+
+    <div class="panel">
+      <h2>📋 История заказов</h2>
+      <div id="orderHistory" class="muted">Заказов пока нет.</div>
     </div>
   </div>
 
@@ -111,6 +121,18 @@
     };
 
     const cart = {};
+
+    function getOrders() {
+      try {
+        return JSON.parse(localStorage.getItem("zoriqOrders") || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveOrders(orders) {
+      localStorage.setItem("zoriqOrders", JSON.stringify(orders));
+    }
 
     function showDetails(name) {
       document.getElementById("catalog").style.display = "none";
@@ -142,40 +164,114 @@
       document.getElementById("cartCount").textContent = "(" + count + ")";
       document.getElementById("total").textContent = total;
 
+      const items = document.getElementById("cartItems");
+
       if (names.length === 0) {
-        document.getElementById("cartItems").textContent = "Корзина пока пуста.";
+        items.textContent = "Корзина пока пуста.";
         return;
       }
 
-      document.getElementById("cartItems").innerHTML = names.map(name =>
-        `<div class="cart-row">
-          <div>${name}<br><small>${prices[name]} баллов × ${cart[name]}</small></div>
-          <div>
-            <button onclick="changeQty('${name}', -1)">−</button>
-            <button onclick="changeQty('${name}', 1)">+</button>
-          </div>
-        </div>`
-      ).join("");
+      items.replaceChildren();
+
+      names.forEach(name => {
+        const row = document.createElement("div");
+        row.className = "cart-row";
+
+        const info = document.createElement("span");
+        info.textContent = name + " — " + prices[name] + " баллов × " + cart[name];
+
+        const controls = document.createElement("span");
+
+        const minus = document.createElement("button");
+        minus.textContent = "−";
+        minus.onclick = () => changeQty(name, -1);
+
+        const plus = document.createElement("button");
+        plus.textContent = "+";
+        plus.onclick = () => changeQty(name, 1);
+
+        controls.append(minus, plus);
+        row.append(info, controls);
+        items.append(row);
+      });
     }
 
     function makeOrder() {
       const names = Object.keys(cart);
+
       if (names.length === 0) {
         alert("Сначала добавь товар в корзину.");
         return;
       }
 
-      const orderNumber = "DEMO-" + Date.now().toString().slice(-6);
-      const summary = names.map(name => name + " × " + cart[name]).join(", ");
-      const total = names.reduce((sum, name) => sum + cart[name] * prices[name], 0);
+      const total = names.reduce(
+        (sum, name) => sum + cart[name] * prices[name], 0
+      );
+
+      const order = {
+        id: "DEMO-" + Date.now().toString().slice(-6),
+        date: new Date().toLocaleString("ru-RU"),
+        items: names.map(name => ({
+          name,
+          quantity: cart[name],
+          price: prices[name]
+        })),
+        total
+      };
+
+      const orders = getOrders();
+      orders.unshift(order);
+
+      try {
+        saveOrders(orders);
+      } catch {
+        alert("Не удалось сохранить заказ на этом устройстве.");
+        return;
+      }
 
       document.getElementById("orderText").textContent =
-        "Номер: " + orderNumber + ". Товары: " + summary +
-        ". Итого: " + total + " баллов.";
+        "Номер: " + order.id + ". Сумма: " + total + " баллов.";
 
       document.getElementById("orderResult").style.display = "block";
-      cart["__lastOrder"] = 1;
+
       clearCart();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = document.getElementById("orderHistory");
+      const orders = getOrders();
+
+      history.replaceChildren();
+
+      if (orders.length === 0) {
+        history.textContent = "Заказов пока нет.";
+        return;
+      }
+
+      orders.forEach(order => {
+        const card = document.createElement("div");
+        card.className = "order";
+
+        const title = document.createElement("strong");
+        title.textContent = "Заказ " + order.id;
+
+        const date = document.createElement("p");
+        date.className = "muted";
+        date.textContent = order.date;
+
+        const products = document.createElement("p");
+        products.textContent = order.items
+          .map(item => item.name + " × " + item.quantity)
+          .join(", ");
+
+        const total = document.createElement("p");
+        total.className = "price";
+        total.textContent = "Итого: " + order.total + " баллов";
+
+        card.append(title, date, products, total);
+        history.append(card);
+      });
     }
 
     function clearCart() {
@@ -188,6 +284,7 @@
     }
 
     renderCart();
+    renderHistory();
   </script>
 </body>
 </html>
