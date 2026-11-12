@@ -97,6 +97,11 @@ function requireOwner(req, res, next) {
   next();
 }
 
+// Публичный каталог демонстрационных товаров
+app.get("/api/products", (req, res) => {
+  res.json({ ok: true, products });
+});
+
 // Проверка владельца
 app.post("/api/admin-check", requireOwner, (req, res) => {
   res.json({ ok: true, owner: true });
