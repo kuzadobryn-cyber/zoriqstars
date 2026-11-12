@@ -1,37 +1,34 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ZoriqStars</title>
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 24px 16px;
+      padding: 22px 16px;
       background: #101321;
       color: white;
       font-family: Arial, sans-serif;
     }
     h1 { text-align: center; color: #ffd76a; }
     .subtitle { text-align: center; color: #aeb4ca; }
-    .products {
-      display: grid;
-      gap: 14px;
-      max-width: 480px;
-      margin: 28px auto;
-    }
-    .product {
+    .wrap { max-width: 480px; margin: auto; }
+    .product, .panel {
       background: #20263d;
       border: 1px solid #414b70;
       border-radius: 16px;
-      padding: 20px;
+      padding: 18px;
+      margin: 14px 0;
     }
-    .product h2 { margin-top: 0; }
-    .product p { color: #c5cbe0; }
+    .product p, .muted { color: #c5cbe0; }
     button {
       width: 100%;
       padding: 13px;
+      margin-top: 9px;
       border: 0;
       border-radius: 10px;
       background: #ffd76a;
@@ -39,56 +36,158 @@
       font-weight: bold;
       font-size: 15px;
     }
-    #details {
-      display: none;
-      max-width: 480px;
-      margin: 20px auto;
-      padding: 20px;
-      background: #20263d;
-      border-radius: 16px;
+    button.secondary {
+      background: #414b70;
+      color: white;
     }
+    .price { color: #ffd76a; font-weight: bold; }
+    .cart-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #414b70;
+    }
+    .cart-row button {
+      width: auto;
+      min-width: 38px;
+      margin: 0;
+      padding: 8px 12px;
+    }
+    #cartCount { color: #ffd76a; }
+    #details, #orderResult { display: none; }
   </style>
 </head>
 <body>
-  <h1>⭐ ZoriqStars</h1>
-  <p class="subtitle">Демонстрационный каталог</p>
+  <div class="wrap">
+    <h1>⭐ ZoriqStars</h1>
+    <p class="subtitle">Демонстрационный магазин</p>
 
-  <div class="products">
-    <div class="product">
-      <h2>⭐ Telegram Stars</h2>
-      <p>Демонстрационная карточка Telegram Stars.</p>
-      <button onclick="showProduct('Telegram Stars', 'Тестовый товар. Реальная покупка недоступна.')">
-        Подробнее
-      </button>
+    <div id="catalog">
+      <div class="product">
+        <h2>⭐ Telegram Stars</h2>
+        <p>Демонстрационный товар Stars.</p>
+        <p class="price">Тестовая цена: 100 баллов</p>
+        <button onclick="showDetails('Telegram Stars')">Подробнее</button>
+        <button class="secondary" onclick="addToCart('Telegram Stars')">Добавить в корзину</button>
+      </div>
+
+      <div class="product">
+        <h2>💎 Telegram Premium</h2>
+        <p>Демонстрационный товар Premium.</p>
+        <p class="price">Тестовая цена: 300 баллов</p>
+        <button onclick="showDetails('Telegram Premium')">Подробнее</button>
+        <button class="secondary" onclick="addToCart('Telegram Premium')">Добавить в корзину</button>
+      </div>
     </div>
 
-    <div class="product">
-      <h2>💎 Telegram Premium</h2>
-      <p>Демонстрационная карточка Premium.</p>
-      <button onclick="showProduct('Telegram Premium', 'Тестовый товар. Реальная покупка недоступна.')">
-        Подробнее
-      </button>
+    <div id="details" class="panel">
+      <h2 id="detailName"></h2>
+      <p class="muted">Это демонстрационная карточка. Реальная покупка недоступна.</p>
+      <button onclick="hideDetails()">Назад к товарам</button>
     </div>
-  </div>
 
-  <div id="details">
-    <h2 id="productName"></h2>
-    <p id="productDescription"></p>
-    <button onclick="closeProduct()">Назад</button>
+    <div class="panel">
+      <h2>🛒 Корзина <span id="cartCount">(0)</span></h2>
+      <div id="cartItems" class="muted">Корзина пока пуста.</div>
+      <h3>Итого: <span class="price" id="total">0</span> баллов</h3>
+      <button onclick="makeOrder()">Оформить тестовый заказ</button>
+      <button class="secondary" onclick="clearCart()">Очистить корзину</button>
+    </div>
+
+    <div id="orderResult" class="panel">
+      <h2>✅ Тестовый заказ создан!</h2>
+      <p id="orderText"></p>
+      <p class="muted">Это учебная запись. Деньги не списываются, оплата не производится.</p>
+      <button onclick="closeOrder()">Продолжить</button>
+    </div>
   </div>
 
   <script>
-    function showProduct(name, description) {
-      document.getElementById('productName').textContent = name;
-      document.getElementById('productDescription').textContent = description;
-      document.querySelector('.products').style.display = 'none';
-      document.getElementById('details').style.display = 'block';
+    const prices = {
+      "Telegram Stars": 100,
+      "Telegram Premium": 300
+    };
+
+    const cart = {};
+
+    function showDetails(name) {
+      document.getElementById("catalog").style.display = "none";
+      document.getElementById("details").style.display = "block";
+      document.getElementById("detailName").textContent = name;
     }
 
-    function closeProduct() {
-      document.querySelector('.products').style.display = 'grid';
-      document.getElementById('details').style.display = 'none';
+    function hideDetails() {
+      document.getElementById("catalog").style.display = "block";
+      document.getElementById("details").style.display = "none";
     }
+
+    function addToCart(name) {
+      cart[name] = (cart[name] || 0) + 1;
+      renderCart();
+    }
+
+    function changeQty(name, amount) {
+      cart[name] = (cart[name] || 0) + amount;
+      if (cart[name] <= 0) delete cart[name];
+      renderCart();
+    }
+
+    function renderCart() {
+      const names = Object.keys(cart);
+      const count = names.reduce((sum, name) => sum + cart[name], 0);
+      const total = names.reduce((sum, name) => sum + cart[name] * prices[name], 0);
+
+      document.getElementById("cartCount").textContent = "(" + count + ")";
+      document.getElementById("total").textContent = total;
+
+      if (names.length === 0) {
+        document.getElementById("cartItems").textContent = "Корзина пока пуста.";
+        return;
+      }
+
+      document.getElementById("cartItems").innerHTML = names.map(name =>
+        `<div class="cart-row">
+          <div>${name}<br><small>${prices[name]} баллов × ${cart[name]}</small></div>
+          <div>
+            <button onclick="changeQty('${name}', -1)">−</button>
+            <button onclick="changeQty('${name}', 1)">+</button>
+          </div>
+        </div>`
+      ).join("");
+    }
+
+    function makeOrder() {
+      const names = Object.keys(cart);
+      if (names.length === 0) {
+        alert("Сначала добавь товар в корзину.");
+        return;
+      }
+
+      const orderNumber = "DEMO-" + Date.now().toString().slice(-6);
+      const summary = names.map(name => name + " × " + cart[name]).join(", ");
+      const total = names.reduce((sum, name) => sum + cart[name] * prices[name], 0);
+
+      document.getElementById("orderText").textContent =
+        "Номер: " + orderNumber + ". Товары: " + summary +
+        ". Итого: " + total + " баллов.";
+
+      document.getElementById("orderResult").style.display = "block";
+      cart["__lastOrder"] = 1;
+      clearCart();
+    }
+
+    function clearCart() {
+      Object.keys(cart).forEach(name => delete cart[name]);
+      renderCart();
+    }
+
+    function closeOrder() {
+      document.getElementById("orderResult").style.display = "none";
+    }
+
+    renderCart();
   </script>
 </body>
 </html>
