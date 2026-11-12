@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZoriqStars</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 22px;
+  background: #100d1c;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+h1 {
+  color: #b99aff;
+}
+.subtitle {
+  color: #aaa3bb;
+}
+.card {
+  background: #211b32;
+  border: 1px solid #392c52;
+  border-radius: 17px;
+  padding: 19px;
+  margin: 15px 0;
+}
+button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: #8052d6;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<h1>✦ ZoriqStars</h1>
+<p class="subtitle">Добро пожаловать в наш магазин!</p>
+
+<div class="card">
+<h2>⭐ Telegram Stars</h2>
+<p>Информация о покупке Stars.</p>
+<button onclick="openLink('https://telegram.org/blog/telegram-stars')">
+Подробнее
+</button>
+</div>
+
+<div class="card">
+<h2>👑 Telegram Premium</h2>
+<p>Информация о подписке Premium.</p>
+<button onclick="openLink('https://telegram.org/faq_premium')">
+Подробнее
+</button>
+</div>
+
+<div class="card">
+<h2>💬 Поддержка</h2>
+<p>Свяжитесь с администратором.</p>
+<button onclick="alert('Поддержка скоро будет подключена')">
+Поддержка
+</button>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+function openLink(url) {
+  tg.openLink(url);
+}
+</script>
+
+</body>
+</html>
